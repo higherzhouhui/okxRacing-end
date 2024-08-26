@@ -1,19 +1,10 @@
 var log4js = require('log4js')
-const { errorResp, successResp } = require('./common')
-const Model = require('./models')
-const utils = require('./utils')
-const dataBase = require('./database')
+const { errorResp, successResp } = require('../middleware/request')
+const Model = require('../model/index')
+const utils = require('../utils/common')
+const dataBase = require('../model/database')
 const moment = require('moment')
-async function example(req, resp) {
-  manager_logger().info('本次迁移成功:')
-  try {
 
-  } catch (error) {
-    manager_logger().info('本次迁移失败:', error)
-    console.error(`${error}`)
-    return errorResp(resp, `${error}`)
-  }
-}
 
 /**
  * 

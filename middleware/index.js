@@ -1,7 +1,7 @@
 const {
   authErrorResp,
   tokenInvalidateErrorResp
-} = require('./common')
+} = require('./request')
 
 var log4js = require('log4js')
 

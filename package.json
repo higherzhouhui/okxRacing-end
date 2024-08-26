@@ -1,8 +1,9 @@
 {
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "set NODE_ENV=1 && nodemon server.js",
     "start": "nodemon server.js",
-    "pm2": "pm2 start server.js --name 'dogApi-v1'"
+    "dev:prod": "set NODE_ENV=PROD && nodemon server.js ",
+    "pm2": "pm2 start server.js --env production --name 'okxRacing'"
   },
   "dependencies": {
     "bignumber.js": "^9.1.2",

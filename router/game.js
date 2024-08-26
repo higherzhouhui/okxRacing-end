@@ -1,8 +1,7 @@
 var log4js = require('log4js')
-const { errorResp, successResp } = require('./common')
-const Model = require('./models')
-const utils = require('./utils')
-const dataBase = require('./database')
+const { errorResp, successResp } = require('../middleware/request')
+const Model = require('../model/index')
+const dataBase = require('../model/database')
 
 /**
  * get /api/game/begin

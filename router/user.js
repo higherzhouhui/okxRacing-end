@@ -1,9 +1,9 @@
 var log4js = require('log4js')
-const { errorResp, successResp } = require('./common')
-const Model = require('./models')
-const dataBase = require('./database')
+const { errorResp, successResp } = require('../middleware/request')
+const Model = require('../model/index')
+const dataBase = require('../model/database')
 const moment = require('moment/moment')
-const { isLastDay } = require('./utils')
+const { isLastDay } = require('../utils/common')
 
 /**
  * post /api/user/login

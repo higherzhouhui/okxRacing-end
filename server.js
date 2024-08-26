@@ -2,12 +2,15 @@ const express = require('express')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
 const app = express()
-const { token_auth, logger } = require('./api/middleware')
+const { token_auth, logger } = require('./middleware/index')
 var multipart = require('connect-multiparty')
 var log4js = require('log4js')
 var bodyParser = require('body-parser')
-
-require('dotenv').config()
+if (process.env.NODE_ENV == 1) {
+  require('dotenv').config({ path: './.env.development' })
+} else {
+  require('dotenv').config({ path: './.env.production' })
+}
 
 require('./utils/swaggerUI')(app);
 
@@ -59,8 +62,6 @@ const white_list = [
   '/api/dogAdmin/login',
   '/api/system/resetTicket',
   /^\/api\/nft\/\d+$/,
-  '/api/system/getFfpAndEthPrice',
-
 ]
 app.use((req, resp, next) => {
   const path = req.path // 获取请求的路径
@@ -81,7 +82,7 @@ app.use((req, resp, next) => {
 })
 app.use(logger)
 
-app.use('/api', require('./api/router'))
+app.use('/api', require('./router/index'))
 
 function system_logger() {
   log4js.configure({
@@ -102,7 +103,7 @@ function system_logger() {
   return logger
 }
 
-const port = process.env.SERVER_PORT || 5174
+const port = process.env.SERVER_PORT
 app.listen(port, function () {
   system_logger().info('1.Api server is listen port:' + port)
 })

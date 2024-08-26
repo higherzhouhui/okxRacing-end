@@ -1,7 +1,6 @@
-const { successResp, errorResp } = require('./common')
-const { CheckInReward } = require('./models')
-const utils = require('./utils')
-const { sequelize, QueryTypes } = require('./database')
+const { successResp, errorResp } = require('../middleware/request')
+const { CheckInReward } = require('../middleware/index')
+const utils = require('../utils/common')
 
 // 配置日志输出
 var log4js = require('log4js')

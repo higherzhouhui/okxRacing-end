@@ -1,11 +1,15 @@
-const { Sequelize, DataTypes, QueryTypes, Op } = require('sequelize')
+const { Sequelize, QueryTypes, Op } = require('sequelize')
 
 const Redis = require('ioredis')
 var log4js = require('log4js')
 var logger = log4js.getLogger('system')
-require('dotenv').config({ path: '../.env' })
-const config = process.env
 
+if (process.env.NODE_ENV == 'DEV') {
+  require('dotenv').config({ path: '../.env.development' })
+} else {
+  require('dotenv').config({ path: '../.env.production' })
+}
+const config = process.env
 const cache = new Redis({
   host: config.DB_HOST,
   port: config.REDIS_PORT,
@@ -54,12 +58,6 @@ const sequelizeAuto = new Sequelize(
     host: config.DB_HOST,
     dialect: 'mysql',
     logging: false,
-    // define: {
-    //   createdAt: 'created_at',
-    //   updatedAt: 'updated_at',
-    //   deletedAt: 'deleted_at',
-    //   underscored: true
-    // }
     pool: {
       max: 30,
       min: 0,

@@ -1,6 +1,6 @@
-const { successResp, errorResp } = require('./common')
-const Model = require('./models')
-const dataBase = require('./database')
+const { successResp, errorResp } = require('../middleware/request')
+const Model = require('../model/index')
+const dataBase = require('../model/database')
 
 /**
  * post /api/task/list
