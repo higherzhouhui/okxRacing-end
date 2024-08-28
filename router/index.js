@@ -5,8 +5,9 @@ const manage = require('./manage.js')
 const game = require('./game.js')
 const checkInReward = require('./reward.js')
 const task = require('./task.js')
+const price = require('./price.js')
 
-const admin = require('./admin.js')
+// const admin = require('./admin.js')
 // admin.init_rewardList()
 // admin.init_taskList()
 // admin.init_manager()
@@ -30,6 +31,9 @@ router.get('/user/getMyScoreHistory', user.getMyScoreHistory)
 
 router.get('/game/begin', game.begin)
 router.post('/game/end', game.end)
+
+//获取价格
+router.get('/price/get', price.getPrice )
 
 // 签到奖励列表
 router.get('/checkInReward/list', checkInReward.list)

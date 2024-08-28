@@ -1,5 +1,5 @@
 const { successResp, errorResp } = require('../middleware/request')
-const { CheckInReward } = require('../middleware/index')
+const { CheckInReward } = require('../model/index')
 const utils = require('../utils/common')
 
 // 配置日志输出

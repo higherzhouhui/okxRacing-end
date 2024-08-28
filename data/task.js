@@ -64,3 +64,7 @@ const list = [
     type: 'Aelf Blockchain task',
   },
 ]
+
+module.exports = {
+  list
+}

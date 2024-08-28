@@ -125,7 +125,7 @@ async function login(req, resp) {
           delete data.id
         }
         await Model.User.create(data)
-        return successResp(resp, { ...data, is_Tg: true }, 'success')
+        return successResp(resp, { ...data, is_Tg: true, is_New: true }, 'success')
       } else {
         return successResp(resp, user, 'success')
       }
@@ -133,7 +133,7 @@ async function login(req, resp) {
   } catch (error) {
     user_logger().error('登录失败', error)
     console.error(`${error}`)
-    return errorResp(resp, `${error}`)
+    return errorResp(resp, 400, `${error}`)
   }
 }
 

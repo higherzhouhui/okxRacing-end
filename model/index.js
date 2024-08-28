@@ -35,6 +35,7 @@ const User = db.sequelize.define(
     last_farming_time: { type: DataTypes.DATE },
     is_really: { type: DataTypes.BOOLEAN, defaultValue: true },
     is_Tg: { type: DataTypes.BOOLEAN, defaultValue: true },
+    is_New: { type: DataTypes.BOOLEAN, defaultValue: true },
   },
   {
     tableName: 'user',
@@ -151,7 +152,18 @@ const UserTask = db.sequelize.define(
     tableName: 'UserTask'
   }
 )
+
 // UserTask.sync({ alter: true })
+const init = false
+if (init) {
+  User.sync({ alter: true })
+  Config.sync({ alter: true })
+  Event.sync({ alter: true })
+  Manager.sync({ alter: true })
+  CheckInReward.sync({ alter: true })
+  TaskList.sync({ alter: true })
+  UserTask.sync({ alter: true })
+}
 
 module.exports = {
   User,

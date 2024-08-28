@@ -36,12 +36,9 @@ async function init_systemConfig() {
 }
 
 async function init_taskList() {
-  await Model.TaskList.sync({ force: true })
   try {
     const list = require('../data/task')
-
-  
-    list.forEach(async item => {
+    list.list.forEach(async item => {
       await Model.TaskList.create(item)
     })
   } catch (error) {
