@@ -62,6 +62,7 @@ const white_list = [
   '/api/dogAdmin/login',
   '/api/system/resetTicket',
   /^\/api\/nft\/\d+$/,
+  '/api/system/getConfig',
 ]
 app.use((req, resp, next) => {
   const path = req.path // 获取请求的路径
