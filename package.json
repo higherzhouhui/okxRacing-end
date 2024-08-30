@@ -13,6 +13,7 @@
     "connect-multiparty": "^2.2.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
     "dotenv": "^16.4.5",
     "ethers": "^5.7.2",
     "express": "^4.19.2",

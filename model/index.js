@@ -22,20 +22,19 @@ const User = db.sequelize.define(
     invite_friends_score: { type: DataTypes.BIGINT, defaultValue: 0 },
     invite_friends_game_score: { type: DataTypes.BIGINT, defaultValue: 0 },
     game_score: { type: DataTypes.DOUBLE, defaultValue: 0 },
-    farm_score: { type: DataTypes.DOUBLE, defaultValue: 0 },
-    invite_friends_farm_score: { type: DataTypes.BIGINT, defaultValue: 0 },
     check_score: { type: DataTypes.BIGINT, defaultValue: 0 },
     task_score: { type: DataTypes.BIGINT, defaultValue: 0 },
     bind_wallet_score: { type: DataTypes.BIGINT, defaultValue: 0 },
     check_date: { type: DataTypes.STRING, defaultValue: '' },
-    ticket: { type: DataTypes.BIGINT, defaultValue: 6 },
+    ticket: { type: DataTypes.BIGINT, defaultValue: 10 },
     wallet: { type: DataTypes.STRING },
     wallet_nickName: { type: DataTypes.STRING },
-    end_farm_time: { type: DataTypes.DATE },
-    last_farming_time: { type: DataTypes.DATE },
     is_really: { type: DataTypes.BOOLEAN, defaultValue: true },
     is_Tg: { type: DataTypes.BOOLEAN, defaultValue: true },
     is_New: { type: DataTypes.BOOLEAN, defaultValue: true },
+    last_play_time: { type: DataTypes.DATE },
+    level: { type: DataTypes.INTEGER, defaultValue: 1},
+    is_auto_driver: { type: DataTypes.BOOLEAN, defaultValue: false },
   },
   {
     tableName: 'user',
@@ -75,7 +74,7 @@ const TaskList = db.sequelize.define(
     linkType: { type: DataTypes.STRING },
     score: { type: DataTypes.INTEGER },
     ticket: { type: DataTypes.INTEGER },
-    type: {type: DataTypes.STRING},
+    type: { type: DataTypes.STRING },
   },
   {
     tableName: 'taskList'
@@ -88,22 +87,19 @@ const TaskList = db.sequelize.define(
 const Config = db.sequelize.define(
   'Config',
   {
-    ticket: { type: DataTypes.INTEGER, defaultValue: 6 },
-    invite_normalAccount_score: { type: DataTypes.INTEGER, defaultValue: 2000 },
-    invite_normalAccount_ticket: { type: DataTypes.INTEGER, defaultValue: 1 },
-    invite_premiumAccount_score: { type: DataTypes.INTEGER, defaultValue: 20000 },
-    invite_premiumAccount_ticket: { type: DataTypes.INTEGER, defaultValue: 5 },
+    right_score: { type: DataTypes.INTEGER, defaultValue: 10 },
+    auto_driver: { type: DataTypes.INTEGER, defaultValue: 750 },
     invite_friends_ratio: { type: DataTypes.INTEGER, defaultValue: 10 },
-    game_time: { type: DataTypes.INTEGER, defaultValue: 30 },
-    special_reward: { type: DataTypes.INTEGER, defaultValue: 2500 },
-    farm_score: { type: DataTypes.INTEGER, defaultValue: 1080 },
-    tg_link: { type: DataTypes.STRING, defaultValue: 'https://t.me/frenpetgame_bot/forkfrengame'},
+    invite_friends_score: { type: DataTypes.INTEGER, defaultValue: 5000 },
+    recovery_time: { type: DataTypes.INTEGER, defaultValue: 90 },
+    tg_link: { type: DataTypes.STRING, defaultValue: 'https://t.me/frenpetgame_bot/forkfrengame' },
   },
   {
     tableName: 'config'
   }
 )
-Config.sync({ alter: true })
+// Config.sync({ force: true })
+// Config.create({})
 /** 操作日志  */
 const Event = db.sequelize.define(
   'Event',
@@ -111,11 +107,17 @@ const Event = db.sequelize.define(
     type: { type: DataTypes.STRING },
     score: { type: DataTypes.INTEGER, defaultValue: 0 },
     from_user: { type: DataTypes.BIGINT },
-    to_user: { type: DataTypes.BIGINT, defaultValue: 0 },
     from_username: { type: DataTypes.STRING, defaultValue: 'system' },
+    to_user: { type: DataTypes.BIGINT, defaultValue: 0 },
     to_username: { type: DataTypes.STRING, defaultValue: 'system' },
     desc: { type: DataTypes.STRING },
     ticket: { type: DataTypes.INTEGER, defaultValue: 0 },
+    guessType: { type: DataTypes.STRING },
+    result: { type: DataTypes.STRING },
+    symbol: { type: DataTypes.STRING, defaultValue: 'BTC' },
+    count: { type: DataTypes.INTEGER, defaultValue: 0 },
+    gas_add: { type: DataTypes.DATE },
+    count_begin: { type: DataTypes.DATE },
     is_really: { type: DataTypes.BOOLEAN, defaultValue: true }
   },
   {
@@ -124,6 +126,7 @@ const Event = db.sequelize.define(
 )
 
 // Event.sync({ alter: true })
+
 
 /** Manager */
 const Manager = db.sequelize.define(

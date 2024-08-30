@@ -3,7 +3,7 @@ const { errorResp, successResp } = require('../middleware/request')
 const Model = require('../model/index')
 const dataBase = require('../model/database')
 const moment = require('moment/moment')
-const { isLastDay } = require('../utils/common')
+const { isLastDay, resetUserTicket } = require('../utils/common')
 
 /**
  * post /api/user/login
@@ -23,7 +23,7 @@ async function login(req, resp) {
       const data = req.body
       if (!(data.hash && data.id && data.username && data.authDate)) {
         user_logger().error('登录失败', '格式不对')
-        return errorResp(resp,  403, `validate error`)
+        return errorResp(resp, 403, `validate error`)
       }
       let user = await Model.User.findOne({
         where: {
@@ -127,7 +127,8 @@ async function login(req, resp) {
         await Model.User.create(data)
         return successResp(resp, { ...data, is_Tg: true, is_New: true }, 'success')
       } else {
-        return successResp(resp, user, 'success')
+        const userInfo = await resetUserTicket(user)
+        return successResp(resp, userInfo, 'success')
       }
     })
   } catch (error) {
@@ -155,7 +156,7 @@ async function h5PcLogin(req, resp) {
       const data = req.body
       if (!(data.wallet && data.wallet_nickName && data.username)) {
         user_logger().error('登录失败', '格式不对')
-        return errorResp(resp,  403, `validate error`)
+        return errorResp(resp, 403, `validate error`)
       }
       let user = await Model.User.findOne({
         where: {
@@ -170,7 +171,7 @@ async function h5PcLogin(req, resp) {
         // 初始化积分
         data.score = info.invite_normalAccount_score
         data.ticket = info.ticket
-       
+
         const event_data = {
           type: 'register',
           from_user: data.id,
@@ -203,7 +204,7 @@ async function h5PcLogin(req, resp) {
               })
               let increment_score = info.invite_normalAccount_score
               let increment_ticket = info.invite_normalAccount_ticket
-             
+
               if (parentUser) {
                 if (isShareGame) {
                   const event_data = {
@@ -250,7 +251,8 @@ async function h5PcLogin(req, resp) {
         await Model.User.create(data)
         return successResp(resp, { ...data, isTg: false }, 'success')
       } else {
-        return successResp(resp, user, 'success')
+        const userInfo = await resetUserTicket(user)
+        return successResp(resp, userInfo, 'success')
       }
     })
   } catch (error) {
@@ -507,7 +509,7 @@ async function getSubUserTotal(req, resp) {
         startParam: req.id
       }
     })
-   
+
     const user = await Model.User.findOne({
       where: {
         user_id: req.id
@@ -540,7 +542,7 @@ async function getSubUserTotal(req, resp) {
         }
       }
     }
-    
+
     return successResp(resp, { total: subUser.count, ...parentObj }, 'success')
   } catch (error) {
     user_logger().error('获取下级总会员失败', error)
@@ -615,7 +617,7 @@ async function getMyScoreHistory(req, resp) {
             to_user: req.id,
           }
         ],
-        
+
       },
     })
     return successResp(resp, { ...list }, 'success')
@@ -641,7 +643,8 @@ async function getUserInfo(req, resp) {
         user_id: req.id
       },
     })
-    return successResp(resp, { userInfo: { ...userInfo.dataValues } }, 'success')
+    const user = await resetUserTicket(userInfo)
+    return successResp(resp, user, 'success')
   } catch (error) {
     user_logger().error('获取下级用户列表失败', error)
     console.error(`${error}`)
@@ -737,8 +740,8 @@ async function getMagicPrize(req, resp) {
           ticket: 0,
           desc: `${user.username} get magic prize`
         }
-        await Model.Event.create(event_data) 
-        return successResp(resp, {score: user.score + 2500}, 'success')
+        await Model.Event.create(event_data)
+        return successResp(resp, { score: user.score + 2500 }, 'success')
       } else {
         return errorResp(resp, 400, 'user had get')
       }
@@ -978,6 +981,9 @@ async function autoCreateUser(query) {
     user_logger().error('创建虚拟用户失败：', error)
   }
 }
+
+
+
 
 // 配置日志输出
 function user_logger() {

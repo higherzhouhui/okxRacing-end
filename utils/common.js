@@ -1,4 +1,5 @@
-
+const Model = require('../model/index')
+const dataBase = require('../model/database')
 
 function timestampToTime(timestamp) {
   const date = new Date(timestamp * 1000) // 创建 Date 对象，使用时间戳作为参数
@@ -129,18 +130,58 @@ function accordingIdGetTime(id) {
     year = 6
     percent = 20
   }
-  return {year, percent}
+  return { year, percent }
 }
 
 
 function isLastDay(timestamp, diff) {
   const date = new Date()
   date.setDate(date.getDate() - diff)
-  date.setHours(0,0,0,0)
+  date.setHours(0, 0, 0, 0)
   const startTimeStamp = date.getTime()
   const endTimeStamp = startTimeStamp + 24 * 60 * 60 * 1000; // 24小时的毫秒数
   // 判断给定的时间戳是否在时间范围内
   return timestamp >= startTimeStamp && timestamp < endTimeStamp;
+}
+
+async function resetUserTicket(user) {
+  let ticket = user.ticket
+  try {
+    if (ticket < 10) {
+      const game_list = await Model.Event.findAll({
+        attributes: ['createdAt', 'gas_add', 'count_begin'],
+        where: {
+          type: 'play_game',
+          from_user: user.user_id,
+          gas_add: {
+            [dataBase.Op.gt]: new Date()
+          }
+        }
+      })
+      let ticket = 10
+      let last_play_time = user.last_play_time
+      if (game_list.length) {
+        ticket = ticket - game_list.length
+        last_play_time = game_list[0].count_begin
+      }
+      user.ticket = ticket
+      user.last_play_time = last_play_time
+      await Model.User.update(
+        {
+          ticket,
+          last_play_time,
+        },
+        {
+          where: {
+            user_id: user.user_id
+          }
+        }
+      )
+    }
+  } catch (error) {
+    console.error('resetUserTicket失败', error)
+  }
+  return user
 }
 
 /******************************Private method */
@@ -154,5 +195,6 @@ module.exports = {
   scaleUpByNumber,
   scaleDownByNumber,
   accordingIdGetTime,
-  isLastDay
+  isLastDay,
+  resetUserTicket
 }

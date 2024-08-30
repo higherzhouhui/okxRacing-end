@@ -44,13 +44,23 @@ function logger(req, resp, next) {
 async function token_auth(req, resp, next) {
   let token = req.headers['authorization']
   middleware_logger().info('token:', token)
+
   if (token == '' || token == undefined) {
     return authErrorResp(resp)
   }
   if (!token.startsWith('Bearer ')) {
     return tokenInvalidateErrorResp(resp)
   }
-  req.id = token.replace('Bearer ', '')
+  let id = token.replace('Bearer ', '')
+  if (id) {
+    id = atob(id)
+    if (!isNaN(id)) {
+      req.id = id
+    }
+  }
+  if (!req.id) {
+    return tokenInvalidateErrorResp(resp)
+  }
   next()
 }
 
