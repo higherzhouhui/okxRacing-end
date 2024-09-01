@@ -1,8 +1,8 @@
 {
   "scripts": {
-    "dev": "set NODE_ENV=1 && nodemon server.js",
+    "dev": "nodemon server.js",
     "start": "nodemon server.js",
-    "dev:prod": "set NODE_ENV=PROD && nodemon server.js ",
+    "dev:local": "set NODE_ENV=1 && nodemon server.js",
     "pm2": "pm2 start server.js --env production --name 'okxRacing'"
   },
   "dependencies": {

@@ -35,14 +35,9 @@ async function login(req, resp) {
         const info = await Model.Config.findOne()
         data.user_id = data.id
         // 初始化积分
-        data.score = info.invite_normalAccount_score
-        data.ticket = info.ticket
-        // 如果是会员则额外增加
-        if (data.isPremium) {
-          data.score += info.invite_premiumAccount_score
-          data.ticket += info.invite_premiumAccount_ticket
-        }
-
+        data.score = 0
+        data.ticket = 10
+        
         const event_data = {
           type: 'register',
           from_user: data.id,
@@ -59,13 +54,8 @@ async function login(req, resp) {
           // 给上级用户加积分
           if (data.startParam) {
             let isShareGame = data.startParam.includes('SHAREGAME')
-            let inviteId;
-            if (isShareGame) {
-              const param = data.startParam.replace('SHAREGAME', '')
-              inviteId = parseInt(atob(param))
-            } else {
-              inviteId = parseInt(atob(data.startParam))
-            }
+            const  inviteId = parseInt(atob(param))
+            
             if (!isNaN(inviteId)) {
               data.startParam = inviteId
               const parentUser = await Model.User.findOne({
@@ -73,47 +63,23 @@ async function login(req, resp) {
                   user_id: inviteId
                 }
               })
-              let increment_score = info.invite_normalAccount_score
-              let increment_ticket = info.invite_normalAccount_ticket
-              // 如果是会员的话积分更多
-              if (data.isPremium) {
-                increment_score = info.invite_premiumAccount_score
-                increment_ticket = info.invite_premiumAccount_ticket
-              }
-
+              let increment_score = info.invite_friends_score
+             
               if (parentUser) {
-                if (isShareGame) {
-                  const event_data = {
-                    type: 'share_playGame',
-                    from_user: data.id,
-                    to_user: inviteId,
-                    score: 50,
-                    ticket: 0,
-                    from_username: data.username,
-                    to_username: parentUser.username,
-                    desc: `${parentUser.username} invite ${data.username} play game!`
-                  }
-                  await Model.Event.create(event_data)
-                }
                 const event_data = {
                   type: 'Inviting',
                   from_user: data.id,
                   to_user: inviteId,
                   score: increment_score,
-                  ticket: increment_ticket,
                   from_username: data.username,
                   to_username: parentUser.username,
                   desc: `${parentUser.username} invite ${data.username} join us!`
                 }
                 await Model.Event.create(event_data)
-                // 顺序不能变
-                if (isShareGame) {
-                  increment_score += 50
-                }
+               
                 await parentUser.increment({
                   score: increment_score,
                   invite_friends_score: increment_score,
-                  ticket: increment_ticket
                 })
               }
             }
