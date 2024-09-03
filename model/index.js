@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize')
 const db = require('./database')
 /** 用户表 */
 const User = db.sequelize.define(
-  'User',
+  'user',
   {
     authDate: { type: DataTypes.STRING, defaultValue: '' },
     chatInstance: { type: DataTypes.STRING, defaultValue: '' },
@@ -47,19 +47,19 @@ const User = db.sequelize.define(
     ]
   }
 )
-User.sync({ alter: true })
+// User.sync({ alter: true })
 
 
 /** 签到奖励列表  */
 const CheckInReward = db.sequelize.define(
-  'checkInReward',
+  'CheckInReward',
   {
     day: { type: DataTypes.INTEGER },
     ticket: { type: DataTypes.INTEGER },
     score: { type: DataTypes.INTEGER }
   },
   {
-    tableName: 'checkInReward'
+    tableName: 'CheckInReward'
   }
 )
 
@@ -68,7 +68,7 @@ const CheckInReward = db.sequelize.define(
 
 /** 任务列表  */
 const TaskList = db.sequelize.define(
-  'taskList',
+  'tasklist',
   {
     name: { type: DataTypes.STRING },
     link: { type: DataTypes.STRING },
@@ -78,7 +78,7 @@ const TaskList = db.sequelize.define(
     type: { type: DataTypes.STRING },
   },
   {
-    tableName: 'taskList'
+    tableName: 'tasklist'
   }
 )
 
@@ -86,7 +86,7 @@ const TaskList = db.sequelize.define(
 
 /** 全局配置  */
 const Config = db.sequelize.define(
-  'Config',
+  'config',
   {
     right_score: { type: DataTypes.INTEGER, defaultValue: 10 },
     free_gas: { type: DataTypes.INTEGER, defaultValue: 3 },
@@ -105,7 +105,7 @@ const Config = db.sequelize.define(
 // Config.create({})
 /** 操作日志  */
 const Event = db.sequelize.define(
-  'Event',
+  'event',
   {
     type: { type: DataTypes.STRING },
     score: { type: DataTypes.INTEGER, defaultValue: 0 },
@@ -133,7 +133,7 @@ const Event = db.sequelize.define(
 
 /** Manager */
 const Manager = db.sequelize.define(
-  'Manager',
+  'manager',
   {
     account: { type: DataTypes.STRING },
     password: { type: DataTypes.STRING },
@@ -148,14 +148,14 @@ const Manager = db.sequelize.define(
 
 /** UserTask */
 const UserTask = db.sequelize.define(
-  'UserTask',
+  'usertask',
   {
     task_id: { type: DataTypes.INTEGER },
     status: { type: DataTypes.STRING, default: 'start' },
     user_id: { type: DataTypes.BIGINT },
   },
   {
-    tableName: 'UserTask'
+    tableName: 'usertask'
   }
 )
 
@@ -163,16 +163,17 @@ const UserTask = db.sequelize.define(
 
 /** UserTask */
 const LevelList = db.sequelize.define(
-  'LevelList',
+  'levellist',
   {
     level: { type: DataTypes.INTEGER },
     score: { type: DataTypes.BIGINT },
     name: { type: DataTypes.STRING },
   },
   {
-    tableName: 'LevelList'
+    tableName: 'levellist'
   }
 )
+// LevelList.sync({ alter: true })
 
 module.exports = {
   User,

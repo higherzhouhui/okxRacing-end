@@ -15,7 +15,7 @@ async function list(req, resp) {
     const id = req.id
     task_logger().info(`用户:${id}获取任务以及完成情况`)
 
-    const sql = `SELECT t.*, ut.status FROM taskList t LEFT JOIN UserTask ut ON t.id = ut.task_id AND ut.user_id=${id} ORDER BY t.id`
+    const sql = `SELECT t.*, ut.status FROM tasklist t LEFT JOIN usertask ut ON t.id = ut.task_id AND ut.user_id=${id} ORDER BY t.id`
     let list = await dataBase.sequelize.query(sql, { type: dataBase.QueryTypes.SELECT })
 
     return successResp(resp, list, 'success')

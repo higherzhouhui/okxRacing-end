@@ -15,11 +15,11 @@ function errorResp(resp, code, msg = 'error') {
 }
 
 function authErrorResp(resp) {
-  return errorResp(resp, 401, 'token is empty')
+  return errorResp(resp, 403, 'token is empty')
 }
 
-function tokenInvalidateErrorResp(resp) {
-  return errorResp(resp, 402, 'token invalid')
+function tokenInvalidateErrorResp(resp, msg) {
+  return errorResp(resp, 403, msg || 'token invalid')
 }
 
 function paramErrorResp(resp) {

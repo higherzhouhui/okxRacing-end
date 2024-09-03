@@ -5,6 +5,7 @@ const manage = require('./manage.js')
 const game = require('./game.js')
 const checkInReward = require('./reward.js')
 const task = require('./task.js')
+const level = require('./level.js')
 
 // 用户路由
 router.post('/user/login', user.login)
@@ -28,6 +29,8 @@ router.get('/game/begin', game.begin)
 router.get('/game/record', game.record)
 router.get('/game/addgas', game.addgas)
 router.post('/game/end', game.end)
+
+router.get('/levellist/list', level.list)
 
 // 签到奖励列表
 router.get('/checkInReward/list', checkInReward.list)

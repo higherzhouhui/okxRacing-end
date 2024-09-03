@@ -2,6 +2,7 @@ const {
   authErrorResp,
   tokenInvalidateErrorResp
 } = require('./request')
+var log4js = require('log4js')
 
 const jwt = require('jsonwebtoken')
 

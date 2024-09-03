@@ -3,7 +3,7 @@ const { errorResp, successResp } = require('../middleware/request')
 const Model = require('../model/index')
 const dataBase = require('../model/database')
 const moment = require('moment/moment')
-const { isLastDay, resetUserTicket } = require('../utils/common')
+const { isLastDay, resetUserTicket, createToken } = require('../utils/common')
 
 /**
  * post /api/user/login
@@ -103,7 +103,7 @@ async function login(req, resp) {
         await user.update(updateData)
         await resetUserTicket(user)
         const token = createToken(user)
-        return successResp(resp, {token, ...user}, 'success')
+        return successResp(resp, {token, ...user.dataValues}, 'success')
       }
     })
   } catch (error) {
@@ -229,7 +229,7 @@ async function h5PcLogin(req, resp) {
       } else {
         const token = createToken(data)
         const userInfo = await resetUserTicket(user)
-        return successResp(resp, {...userInfo, token}, 'success')
+        return successResp(resp, {...userInfo.dataValues, token}, 'success')
       }
     })
   } catch (error) {

@@ -12,18 +12,40 @@ async function init_manager() {
       await Model.Manager.create(item)
     })
   } catch (error) {
-    console.error('init manage error:', error)
+    admin_logger().error('init manage error:', error)
   }
 }
 
 async function init_rewardList() {
   try {
-    const exp = require('../data/reward')
-    exp.list.map(async item => {
+    const reward = require('../data/reward')
+    reward.list.map(async item => {
       await Model.CheckInReward.create(item)
     })
   } catch (error) {
-    console.error('init exp error:', error)
+    admin_logger().error('init CheckInReward error:', error)
+  }
+}
+
+async function init_taskList() {
+  try {
+    const list = require('../data/task')
+    list.list.map(async item => {
+      await Model.TaskList.create(item)
+    })
+  } catch (error) {
+    admin_logger().error('init tasklist error:', error)
+  }
+}
+
+async function init_levelList() {
+  try {
+    const list = require('../data/level')
+    list.list.map(async item => {
+      await Model.LevelList.create(item)
+    })
+  } catch (error) {
+    admin_logger().error('init LevelList error:', error)
   }
 }
 
@@ -31,32 +53,9 @@ async function init_systemConfig() {
   try {
     await Model.Config.create({})
   } catch (error) {
-    console.error('init exp error:', error)
+    admin_logger().error('init Config error:', error)
   }
 }
-
-async function init_taskList() {
-  try {
-    const list = require('../data/task')
-    list.list.forEach(async item => {
-      await Model.TaskList.create(item)
-    })
-  } catch (error) {
-    console.error('init tasklist error:', error)
-  }
-}
-
-async function init_levelList() {
-  try {
-    const list = require('../data/level')
-    list.list.forEach(async item => {
-      await Model.LevelList.create(item)
-    })
-  } catch (error) {
-    console.error('init LevelList error:', error)
-  }
-}
-
 
 //----------------------------- private method --------------
 // 配置日志输出
@@ -80,12 +79,13 @@ function admin_logger() {
 }
 
 async function init_baseData() {
+  await init_taskList();
+  await init_levelList();
   await init_manager();
   await init_rewardList();
   await init_systemConfig();
-  await init_taskList();
-  await init_levelList();
-  
+
+
   const config = await Model.Config.findAll()
   if (config) {
     console.log(config)
