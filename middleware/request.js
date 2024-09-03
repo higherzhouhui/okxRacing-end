@@ -1,6 +1,3 @@
-const fs = require('fs')
-const path = require('path')
-
 const successResp = (resp, data, msg = 'success') => {
   return resp.send({
     code: 0,
@@ -18,25 +15,15 @@ function errorResp(resp, code, msg = 'error') {
 }
 
 function authErrorResp(resp) {
-  return errorResp(resp, 401, 'token 不能为空')
+  return errorResp(resp, 401, 'token is empty')
 }
 
 function tokenInvalidateErrorResp(resp) {
-  return errorResp(resp, 402, 'token 无效')
+  return errorResp(resp, 402, 'token invalid')
 }
 
 function paramErrorResp(resp) {
-  return errorResp(resp, 400, '缺少必须的参数')
-}
-
-function system_config() {
-  const config = fs.readFileSync(path.join(__dirname, '../data/config.json'))
-  return JSON.parse(config)
-}
-
-function contract_addr() {
-  const config = fs.readFileSync(path.join(__dirname, '../data/contract_addr.json'))
-  return JSON.parse(config)
+  return errorResp(resp, 400, 'Missing necessary parameters')
 }
 
 module.exports = {
@@ -45,6 +32,4 @@ module.exports = {
   authErrorResp,
   tokenInvalidateErrorResp,
   paramErrorResp,
-  system_config,
-  contract_addr
 }

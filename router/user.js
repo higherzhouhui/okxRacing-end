@@ -21,9 +21,12 @@ async function login(req, resp) {
   try {
     await dataBase.sequelize.transaction(async (t) => {
       const data = req.body
+      if (!data.username) {
+        data.username = data.firstName + data.lastName
+      }
       if (!(data.hash && data.id && data.username && data.authDate)) {
         user_logger().error('登录失败', '格式不对')
-        return errorResp(resp, 403, `validate error`)
+        return errorResp(resp, 400, `validate error`)
       }
       let user = await Model.User.findOne({
         where: {
@@ -37,9 +40,9 @@ async function login(req, resp) {
         // 初始化积分
         data.score = 0
         data.ticket = 10
-        
+
         const event_data = {
-          type: 'register',
+          type: 'Register',
           from_user: data.id,
           to_user: data.id,
           score: data.score,
@@ -54,8 +57,8 @@ async function login(req, resp) {
           // 给上级用户加积分
           if (data.startParam) {
             let isShareGame = data.startParam.includes('SHAREGAME')
-            const  inviteId = parseInt(atob(param))
-            
+            const inviteId = parseInt(atob(param))
+
             if (!isNaN(inviteId)) {
               data.startParam = inviteId
               const parentUser = await Model.User.findOne({
@@ -64,7 +67,7 @@ async function login(req, resp) {
                 }
               })
               let increment_score = info.invite_friends_score
-             
+
               if (parentUser) {
                 const event_data = {
                   type: 'Inviting',
@@ -76,7 +79,7 @@ async function login(req, resp) {
                   desc: `${parentUser.username} invite ${data.username} join us!`
                 }
                 await Model.Event.create(event_data)
-               
+
                 await parentUser.increment({
                   score: increment_score,
                   invite_friends_score: increment_score,
@@ -93,6 +96,9 @@ async function login(req, resp) {
         await Model.User.create(data)
         return successResp(resp, { ...data, is_Tg: true, is_New: true }, 'success')
       } else {
+        //更新用户信息
+        const updateData = data.user
+        await user.update(updateData)
         const userInfo = await resetUserTicket(user)
         return successResp(resp, userInfo, 'success')
       }
@@ -122,7 +128,7 @@ async function h5PcLogin(req, resp) {
       const data = req.body
       if (!(data.wallet && data.wallet_nickName && data.username)) {
         user_logger().error('登录失败', '格式不对')
-        return errorResp(resp, 403, `validate error`)
+        return errorResp(resp, 400, `validate error`)
       }
       let user = await Model.User.findOne({
         where: {
@@ -518,6 +524,49 @@ async function getSubUserTotal(req, resp) {
 }
 
 /**
+ * get /api/user/subtotallist
+ * @summary 获取下级会员贡献总积分和列表
+ * @tags user
+ * @description 获取下级会员贡献总积分和列表
+ * @security - Authorization
+ */
+async function getSubUserTotalAndList(req, resp) {
+  user_logger().info('获取下级会员贡献总积分和列表', req.id)
+  try {
+    const page = req.query.page || 1
+    const sql = `
+    SELECT from_user, from_username, SUM(score) AS total_score
+    FROM event
+    WHERE to_user = ${req.id} AND from_user <> ${req.id}
+    GROUP BY from_user
+    ORDER BY createdAt desc
+    LIMIT 10 OFFSET ${(page - 1) * 10};
+    `;
+    const result = await dataBase.sequelize.query(sql, { type: dataBase.QueryTypes.SELECT })
+    const totalUser = await Model.User.count({
+      where: {
+        startParam: req.id
+      }
+    })
+    const sql2 = `SELECT SUM(score) as total_score FROM event WHERE to_user = ${req.id} AND from_user <> ${req.id};`
+    const totalScore = await dataBase.sequelize.query(sql2, { type: dataBase.QueryTypes.SELECT })
+    const data = {
+      total: {
+        user: totalUser,
+        score: totalScore[0].total_score,
+      },
+      rows: result
+    }
+    return successResp(resp, data, 'success')
+  } catch (error) {
+    user_logger().error('获取下级会员贡献总积分和列表失败', error)
+    console.error(`${error}`)
+    return errorResp(resp, `${error}`)
+  }
+}
+
+
+/**
  * get /api/user/subList
  * @summary 获取下级用户列表
  * @tags user
@@ -529,19 +578,23 @@ async function getSubUserList(req, resp) {
   user_logger().info('获取下级用户列表', req.id)
   try {
     const page = req.query.page
-    const list = await Model.Event.findAndCountAll({
-      order: [['createdAt', 'desc']],
-      attributes: ['from_username', 'score', 'createdAt', 'type'],
+    const list = await Model.User.findAndCountAll({
+      order: [['score', 'desc']],
+      attributes: ['username', 'score', 'createdAt'],
       offset: (page - 1) * 20,
       limit: 20 * 1,
       where: {
-        to_user: req.id,
-        score: {
-          [dataBase.Op.gt]: 0
-        },
+        [dataBase.Op.or]: [
+          {
+            user_id: req.id
+          },
+          {
+            startParam: req.id,
+          }
+        ],
       }
     })
-    return successResp(resp, { ...list }, 'success')
+    return successResp(resp, list, 'success')
   } catch (error) {
     user_logger().error('获取下级用户列表失败', error)
     console.error(`${error}`)
@@ -915,7 +968,7 @@ async function autoCreateUser(query) {
       data.startParam = inviteList[Math.floor(Math.random() * inviteList.length)]
       data.user_id = `${new Date().getTime()}`
       data.score = Math.floor(query.score * Math.random()) || Math.floor(Math.random() * 30 * info.one_year_add + info.not_one_year)
-      const invite_score = Math.floor(Math.random() * info.invite_add + info.invite_add)
+      const invite_score = 5000
       await Model.User.create(data)
 
       const parentUser = await Model.User.findOne({
@@ -931,7 +984,7 @@ async function autoCreateUser(query) {
         })
       }
       const event = {
-        type: 'register',
+        type: 'Register',
         from_user: data.user_id,
         from_username: data.username,
         to_user: data.startParam,
@@ -987,5 +1040,6 @@ module.exports = {
   getSubUserTotal,
   getMagicPrize,
   getMyScoreHistory,
-  h5PcLogin
+  h5PcLogin,
+  getSubUserTotalAndList,
 }

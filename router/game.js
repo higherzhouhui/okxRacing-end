@@ -3,6 +3,7 @@ const { errorResp, successResp } = require('../middleware/request')
 const Model = require('../model/index')
 const dataBase = require('../model/database')
 const { resetUserTicket } = require('../utils/common')
+
 /**
  * get /api/game/begin
  * @summary 开始游戏
@@ -97,14 +98,16 @@ async function end(req, resp) {
         if (count) {
           const play_game_list = await Model.Event.findAll({
             attributes: ['count'],
+            offset: 0,
+            limit: 20,
             order: [['createdAt', 'desc']],
             where: {
               type: 'play_game',
               from_user: req.id
             }
           })
-          for (let i; i < play_game_list.length; i++) {
-            if (item > 0) {
+          for (let i = 0; i < play_game_list.length; i++) {
+            if (play_game_list[i].count > 0) {
               count += 1
             } else {
               break;
@@ -139,7 +142,7 @@ async function end(req, resp) {
           symbol,
           gas_add,
           count_begin,
-          desc: `${user.username} ${result} game GET ${score} $Score`
+          desc: `${user.username} ${result} game GET ${score} $Pts`
         }
         await Model.Event.create(event_data)
 
@@ -184,6 +187,80 @@ async function end(req, resp) {
   }
 }
 
+
+/**
+ * get /api/game/addgas
+ * @summary 加满油箱
+ * @tags game
+ * @description 加满油箱接口
+ * @security - Authorization
+ */
+async function addgas(req, resp) {
+  game_logger().info('加满油箱')
+  try {
+    await dataBase.sequelize.transaction(async (t) => {
+      const userInfo = await Model.User.findOne({
+        where: {
+          user_id: req.id
+        }
+      })
+      if (!userInfo) {
+        return errorResp(resp, 404, 'not found this user')
+      }
+      const config = await Model.Config.findOne()
+      if (userInfo.ticket == config.ticket) {
+        return errorResp(resp, 400, 'The current fuel tank is full!')
+      }
+      if (userInfo.free_gas == 0) {
+        return errorResp(resp, 400, `Today's refueling opportunity has been exhausted!`)
+      }
+      const upData = {
+        ticket: config.ticket,
+        free_gas: userInfo.free_gas - 1
+      }
+      await userInfo.update(upData)
+
+      return successResp(resp, upData, 'success')
+    })
+  } catch (error) {
+    game_logger().error('加满油箱失败', error)
+    console.error(`${error}`)
+    return errorResp(resp, 400, `${error}`)
+  }
+}
+
+/**
+ * get /api/game/record
+ * @summary 获取游戏记录
+ * @tags game
+ * @description 获取游戏记录接口
+ * @security - Authorization
+ */
+async function record(req, resp) {
+  game_logger().info('获取游戏记录')
+  try {
+    await dataBase.sequelize.transaction(async (t) => {
+      const page = req.query.page
+      const pageSize = req.query.pageSize
+      const list = await Model.Event.findAndCountAll({
+        order: [['createdAt', 'desc']],
+        offset: (page - 1) * pageSize,
+        limit: Number(pageSize),
+        where: {
+          type: 'play_game',
+          from_user: req.id,
+          to_user: req.id
+        }
+      })
+      return successResp(resp, list, 'success')
+    })
+  } catch (error) {
+    game_logger().error('获取游戏记录失败', error)
+    console.error(`${error}`)
+    return errorResp(resp, 400, `${error}`)
+  }
+}
+
 //----------------------------- private method --------------
 // 配置日志输出
 function game_logger() {
@@ -208,4 +285,6 @@ function game_logger() {
 module.exports = {
   begin,
   end,
+  record,
+  addgas
 }

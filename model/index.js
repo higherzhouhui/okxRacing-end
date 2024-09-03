@@ -5,17 +5,17 @@ const User = db.sequelize.define(
   'User',
   {
     authDate: { type: DataTypes.STRING, defaultValue: '' },
+    chatInstance: { type: DataTypes.STRING, defaultValue: '' },
     hash: { type: DataTypes.STRING },
     query_id: { type: DataTypes.STRING },
     addedToAttachmentMenu: { type: DataTypes.STRING },
     allowsWriteToPm: { type: DataTypes.BOOLEAN },
-    first_name: { type: DataTypes.STRING },
+    firstName: { type: DataTypes.STRING },
     user_id: { type: DataTypes.BIGINT },
     languageCode: { type: DataTypes.STRING },
-    last_name: { type: DataTypes.STRING },
+    lastName: { type: DataTypes.STRING },
     username: { type: DataTypes.STRING },
     score: { type: DataTypes.DOUBLE, defaultValue: 0 },
-    telegram_premium: { type: DataTypes.BIGINT, defaultValue: 0 },
     isPremium: { type: DataTypes.BOOLEAN, defaultValue: false },
     startParam: { type: DataTypes.STRING, defaultValue: '0' },
     photoUrl: { type: DataTypes.STRING },
@@ -34,6 +34,7 @@ const User = db.sequelize.define(
     is_New: { type: DataTypes.BOOLEAN, defaultValue: true },
     last_play_time: { type: DataTypes.DATE },
     level: { type: DataTypes.INTEGER, defaultValue: 1},
+    free_gas: { type: DataTypes.INTEGER, defaultValue: 3},
     is_auto_driver: { type: DataTypes.BOOLEAN, defaultValue: false },
   },
   {
@@ -46,7 +47,7 @@ const User = db.sequelize.define(
     ]
   }
 )
-// User.sync({ alter: true })
+User.sync({ alter: true })
 
 
 /** 签到奖励列表  */
@@ -88,6 +89,8 @@ const Config = db.sequelize.define(
   'Config',
   {
     right_score: { type: DataTypes.INTEGER, defaultValue: 10 },
+    free_gas: { type: DataTypes.INTEGER, defaultValue: 3 },
+    ticket: { type: DataTypes.INTEGER, defaultValue: 10 },
     auto_driver: { type: DataTypes.INTEGER, defaultValue: 750 },
     invite_friends_ratio: { type: DataTypes.INTEGER, defaultValue: 10 },
     invite_friends_score: { type: DataTypes.INTEGER, defaultValue: 5000 },
@@ -157,16 +160,19 @@ const UserTask = db.sequelize.define(
 )
 
 // UserTask.sync({ alter: true })
-const init = false
-if (init) {
-  User.sync({ alter: true })
-  Config.sync({ alter: true })
-  Event.sync({ alter: true })
-  Manager.sync({ alter: true })
-  CheckInReward.sync({ alter: true })
-  TaskList.sync({ alter: true })
-  UserTask.sync({ alter: true })
-}
+
+/** UserTask */
+const LevelList = db.sequelize.define(
+  'LevelList',
+  {
+    level: { type: DataTypes.INTEGER },
+    score: { type: DataTypes.BIGINT },
+    name: { type: DataTypes.STRING },
+  },
+  {
+    tableName: 'LevelList'
+  }
+)
 
 module.exports = {
   User,
@@ -176,4 +182,5 @@ module.exports = {
   CheckInReward,
   TaskList,
   UserTask,
+  LevelList
 }

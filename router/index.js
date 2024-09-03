@@ -28,8 +28,11 @@ router.get('/user/startFarming', user.startFarming)
 router.get('/user/getRewardFarming', user.getRewardFarming)
 router.get('/user/getMagicPrize', user.getMagicPrize)
 router.get('/user/getMyScoreHistory', user.getMyScoreHistory)
+router.get('/user/subtotallist', user.getSubUserTotalAndList)
 
 router.get('/game/begin', game.begin)
+router.get('/game/record', game.record)
+router.get('/game/addgas', game.addgas)
 router.post('/game/end', game.end)
 
 //获取价格

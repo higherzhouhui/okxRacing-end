@@ -46,6 +46,16 @@ async function init_taskList() {
   }
 }
 
+async function init_levelList() {
+  try {
+    const list = require('../data/level')
+    list.list.forEach(async item => {
+      await Model.LevelList.create(item)
+    })
+  } catch (error) {
+    console.error('init LevelList error:', error)
+  }
+}
 
 
 //----------------------------- private method --------------
@@ -73,5 +83,6 @@ module.exports = {
   init_manager,
   init_rewardList,
   init_systemConfig,
-  init_taskList
+  init_taskList,
+  init_levelList
 }
