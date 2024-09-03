@@ -1,5 +1,17 @@
 const Model = require('../model/index')
 const dataBase = require('../model/database')
+const jwt = require('jsonwebtoken')
+const SECRET_KEY = 'CAT_API'
+
+function createToken(data) {
+  const token = jwt.sign(
+    { user: {username: data.username, id: data.user_id} },
+    SECRET_KEY,
+    { expiresIn: '10 days' }
+  )
+  return token
+}
+
 
 function timestampToTime(timestamp) {
   const date = new Date(timestamp * 1000) // 创建 Date 对象，使用时间戳作为参数
@@ -196,5 +208,6 @@ module.exports = {
   scaleDownByNumber,
   accordingIdGetTime,
   isLastDay,
-  resetUserTicket
+  resetUserTicket,
+  createToken,
 }

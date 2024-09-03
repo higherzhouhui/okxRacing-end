@@ -7,9 +7,9 @@ var multipart = require('connect-multiparty')
 var log4js = require('log4js')
 var bodyParser = require('body-parser')
 if (process.env.NODE_ENV == 1) {
-  require('dotenv').config({ path: './.env.development' })
+  require('dotenv').config({ path: './.env.dev' })
 } else {
-  require('dotenv').config({ path: './.env.production' })
+  require('dotenv').config({ path: './.env' })
 }
 
 require('./utils/swaggerUI')(app);

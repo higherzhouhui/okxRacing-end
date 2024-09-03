@@ -5,13 +5,7 @@ const manage = require('./manage.js')
 const game = require('./game.js')
 const checkInReward = require('./reward.js')
 const task = require('./task.js')
-const price = require('./price.js')
 
-// const admin = require('./admin.js')
-// admin.init_rewardList()
-// admin.init_taskList()
-// admin.init_manager()
-// admin.init_systemConfig()
 // 用户路由
 router.post('/user/login', user.login)
 router.post('/user/h5PcLogin', user.h5PcLogin)
@@ -34,9 +28,6 @@ router.get('/game/begin', game.begin)
 router.get('/game/record', game.record)
 router.get('/game/addgas', game.addgas)
 router.post('/game/end', game.end)
-
-//获取价格
-router.get('/price/get', price.getPrice )
 
 // 签到奖励列表
 router.get('/checkInReward/list', checkInReward.list)

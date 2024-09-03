@@ -5,9 +5,9 @@ var log4js = require('log4js')
 var logger = log4js.getLogger('system')
 
 if (process.env.NODE_ENV == 'DEV') {
-  require('dotenv').config({ path: '../.env.development' })
+  require('dotenv').config({ path: '../.env.dev' })
 } else {
-  require('dotenv').config({ path: '../.env.production' })
+  require('dotenv').config({ path: '../.env' })
 }
 const config = process.env
 const cache = new Redis({
@@ -78,7 +78,7 @@ async function connectDB() {
     if (process.env.INIT == 1) {
       await sequelize.sync({ force: true }); // 删除并重新创建所有表
       logger.log('4.waiting...');
-      const admin = require('./admin.js')
+      const admin = require('../router/admin.js')
       const result = await admin.init_baseData()
       logger.log(`6.Init ${result}`)
       logger.log('7.You can run pm2')

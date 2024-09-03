@@ -94,13 +94,16 @@ async function login(req, resp) {
           delete data.id
         }
         await Model.User.create(data)
-        return successResp(resp, { ...data, is_Tg: true, is_New: true }, 'success')
+        const token = createToken(data)
+
+        return successResp(resp, { ...data, is_Tg: true, is_New: true, token }, 'success')
       } else {
         //更新用户信息
         const updateData = data.user
         await user.update(updateData)
-        const userInfo = await resetUserTicket(user)
-        return successResp(resp, userInfo, 'success')
+        await resetUserTicket(user)
+        const token = createToken(user)
+        return successResp(resp, {token, ...user}, 'success')
       }
     })
   } catch (error) {
@@ -221,10 +224,12 @@ async function h5PcLogin(req, resp) {
           delete data.id
         }
         await Model.User.create(data)
-        return successResp(resp, { ...data, isTg: false }, 'success')
+        const token = createToken(data)
+        return successResp(resp, { ...data, isTg: false, token }, 'success')
       } else {
+        const token = createToken(data)
         const userInfo = await resetUserTicket(user)
-        return successResp(resp, userInfo, 'success')
+        return successResp(resp, {...userInfo, token}, 'success')
       }
     })
   } catch (error) {

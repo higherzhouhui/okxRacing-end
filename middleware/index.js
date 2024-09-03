@@ -3,7 +3,7 @@ const {
   tokenInvalidateErrorResp
 } = require('./request')
 
-var log4js = require('log4js')
+const jwt = require('jsonwebtoken')
 
 function middleware_logger() {
   log4js.configure({
@@ -27,13 +27,13 @@ function middleware_logger() {
 function logger(req, resp, next) {
   if (req.method == 'GET') {
     middleware_logger().info(
-      `用户id:${req.id}-GET请求url:${req.url}-请求参数：${JSON.stringify(
+      `用户: ${req.username} id: ${req.id}-GET请求url: ${req.url} -请求参数：${JSON.stringify(
         req.query
       )}`
     )
   } else if (req.method == 'POST') {
     middleware_logger().info(
-      `用户id:${req.id}-POST请求url:${req.url}-请求body：${JSON.stringify(
+      `用户: ${req.username} id: ${req.id}-POST请求url: ${req.url} -请求body: ${JSON.stringify(
         req.body
       )}`
     )
@@ -44,24 +44,21 @@ function logger(req, resp, next) {
 async function token_auth(req, resp, next) {
   let token = req.headers['authorization']
   middleware_logger().info('token:', token)
-
   if (token == '' || token == undefined) {
     return authErrorResp(resp)
   }
   if (!token.startsWith('Bearer ')) {
     return tokenInvalidateErrorResp(resp)
   }
-  let id = token.replace('Bearer ', '')
-  if (id) {
-    id = atob(id)
-    if (!isNaN(id)) {
-      req.id = id
+  token = token.substring(7)
+  jwt.verify(token, 'CAT_API', (error, jwtData) => {
+    if (error) {
+      return tokenInvalidateErrorResp(resp, 'token is expired')
     }
-  }
-  if (!req.id) {
-    return tokenInvalidateErrorResp(resp)
-  }
-  next()
+    req.id = jwtData.user.id
+    req.username = jwtData.user.username
+    next()
+  })
 }
 
 module.exports = {
