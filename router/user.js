@@ -39,7 +39,7 @@ async function login(req, resp) {
         data.user_id = data.id
         // 初始化积分
         data.score = 0
-        data.ticket = 10
+        data.ticket = info.ticket
 
         const event_data = {
           type: 'Register',
@@ -130,7 +130,7 @@ async function h5PcLogin(req, resp) {
     await dataBase.sequelize.transaction(async (t) => {
       const data = req.body
       if (!(data.wallet && data.wallet_nickName && data.username)) {
-        user_logger().error('登录失败', '格式不对')
+        user_logger().error('登录失败', '缺少必要参数')
         return errorResp(resp, 400, `validate error`)
       }
       let user = await Model.User.findOne({
@@ -144,11 +144,11 @@ async function h5PcLogin(req, resp) {
         data.user_id = `${new Date().getTime()}`
         data.id = data.user_id
         // 初始化积分
-        data.score = info.invite_normalAccount_score
+        data.score = info.bind_wallet_score
         data.ticket = info.ticket
 
         const event_data = {
-          type: 'register',
+          type: 'Register',
           from_user: data.id,
           to_user: data.id,
           score: data.score,
@@ -178,7 +178,6 @@ async function h5PcLogin(req, resp) {
                 }
               })
               let increment_score = info.invite_normalAccount_score
-              let increment_ticket = info.invite_normalAccount_ticket
 
               if (parentUser) {
                 if (isShareGame) {
@@ -199,7 +198,6 @@ async function h5PcLogin(req, resp) {
                   from_user: data.id,
                   to_user: inviteId,
                   score: increment_score,
-                  ticket: increment_ticket,
                   from_username: data.username,
                   to_username: parentUser.username,
                   desc: `${parentUser.username} invite ${data.username} join us!`
@@ -212,7 +210,6 @@ async function h5PcLogin(req, resp) {
                 await parentUser.increment({
                   score: increment_score,
                   invite_friends_score: increment_score,
-                  ticket: increment_ticket
                 })
               }
             }
@@ -409,23 +406,44 @@ async function bindWallet(req, resp) {
     if (!user) {
       return errorResp(resp, 400, `can't find this user`)
     }
-    await Model.User.update({
+    const config = await Model.Config.findOne()
+    let score = 0
+    if (!user.bind_wallet_score) {
+      score = config.bind_wallet_score
+    }
+    const updateData = {
       wallet: req.body.wallet,
-      wallet_nickName: req.body.wallet_nickName
-    }, {
+      wallet_nickName: req.body.wallet_nickName,
+      score: user.score + score,
+      bind_wallet_score: bind_wallet_score + score,
+    }
+    await Model.User.update(updateData, {
       where: {
         user_id: req.id
       },
       transaction: tx
     })
-
+    // 如果不是初次绑定，则记录增加积分
+    if (score) {
+      const event_data = {
+        type: 'Bind Wallet',
+        from_user: req.id,
+        from_username: user.username,
+        to_user: req.id,
+        to_username: user.username,
+        score: score,
+        desc: `${user.username} bind wallet and get ${score} pts`,
+      }
+      await Model.Event.create(event_data)
+    }
+   
     await tx.commit()
-    return successResp(resp, { wallet: req.body.wallet, wallet_nickName: req.body.wallet_nickName }, 'success')
+    return successResp(resp, updateData, 'success')
   } catch (error) {
     await tx.rollback()
     user_logger().error('用户绑定钱包失败', error)
     console.error(`${error}`)
-    return errorResp(resp, `${error}`)
+    return errorResp(resp, 400, `${error}`)
   }
 }
 
@@ -441,9 +459,6 @@ async function getUserList(req, resp) {
   user_logger().info('获取用户列表', req.id)
   try {
     const page = req.query.page
-    // const total = await dataBase.sequelize.query(`SELECT SUM(score) as total FROM user`, {
-    //   type: dataBase.QueryTypes.SELECT
-    // })
     const list = await Model.User.findAndCountAll({
       order: [['score', 'desc']],
       offset: (page - 1) * 20,
@@ -855,8 +870,6 @@ async function startFarming(req, resp) {
 }
 
 
-
-
 /**
  * get /api/user/getRewardFarming
  * @summary 收货果实
@@ -945,6 +958,33 @@ async function getRewardFarming(req, resp) {
     })
   } catch (error) {
     user_logger().error('收货果实失败', error)
+    return errorResp(resp, 400, `${error}`)
+  }
+}
+
+/**
+ * get /api/user/getcertifieds
+ * @summary 获取已经认证的人数
+ * @tags user
+ * @description 获取已经认证的人数
+ * @security - Authorization
+ */
+
+async function getCertifieds(req, resp) {
+  try {
+    const id = req.id
+    await dataBase.sequelizeAuto.transaction(async (t) => {
+      const count = await Model.User.count({
+        where: {
+          wallet: {
+            [dataBase.Op.ne]: null
+          },
+        }
+      })
+      return successResp(resp, {count}, 'success')
+    })
+  } catch(error) {
+    user_logger().error('获取已经认证的人数失败', error)
     return errorResp(resp, 400, `${error}`)
   }
 }
@@ -1047,4 +1087,5 @@ module.exports = {
   getMyScoreHistory,
   h5PcLogin,
   getSubUserTotalAndList,
+  getCertifieds,
 }

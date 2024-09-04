@@ -219,7 +219,14 @@ async function addgas(req, resp) {
         free_gas: userInfo.free_gas - 1
       }
       await userInfo.update(upData)
-
+      await Model.Event.update({
+        gas_add: new Date(),
+      }, {
+        where: {
+          type: 'play_game',
+          from_user: req.id,
+        }
+      })
       return successResp(resp, upData, 'success')
     })
   } catch (error) {

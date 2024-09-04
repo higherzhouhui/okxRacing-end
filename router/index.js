@@ -24,6 +24,8 @@ router.get('/user/getRewardFarming', user.getRewardFarming)
 router.get('/user/getMagicPrize', user.getMagicPrize)
 router.get('/user/getMyScoreHistory', user.getMyScoreHistory)
 router.get('/user/subtotallist', user.getSubUserTotalAndList)
+router.get('/user/getcertifieds', user.getCertifieds)
+
 
 router.get('/game/begin', game.begin)
 router.get('/game/record', game.record)
