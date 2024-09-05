@@ -114,20 +114,24 @@ async function end(req, resp) {
             }
           }
         }
+      
         let count_begin = new Date()
         let gas_add = new Date(count_begin.getTime() + config.recovery_time * 1000)
-        if (responseData.ticket != 9) {
-          const gameInfo = await Model.Event.findOne({
-            order: [['createdAt', 'desc']],
-            where: {
-              type: 'play_game',
-              from_user: req.id,
-            }
-          })
-          count_begin = gameInfo.gas_add
-          gas_add = new Date(count_begin.getTime() + config.recovery_time * 1000)
+        try {
+          if (responseData.ticket != config.dataValues.ticket - 1) {
+            const gameInfo = await Model.Event.findOne({
+              order: [['createdAt', 'desc']],
+              where: {
+                type: 'play_game',
+                from_user: req.id,
+              }
+            })
+            count_begin = gameInfo.gas_add
+            gas_add = new Date(count_begin.getTime() + config.recovery_time * 1000)
+          }
+        } catch(error) {
+          game_logger().error('gas_add error:', `${error}`)
         }
-
         const event_data = {
           type: 'play_game',
           from_user: req.id,
@@ -181,7 +185,7 @@ async function end(req, resp) {
       }
     })
   } catch (error) {
-    game_logger().error('结算游戏失败', error)
+    game_logger().error('结算游戏失败', `${error}`)
     console.error(`${error}`)
     return errorResp(resp, 400, `${error}`)
   }

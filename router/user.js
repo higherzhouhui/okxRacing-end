@@ -25,7 +25,7 @@ async function login(req, resp) {
         data.username = data.firstName + data.lastName
       }
       if (!(data.hash && data.id && data.username && data.authDate)) {
-        user_logger().error('登录失败', '格式不对')
+        user_logger().error('登录失败', '缺少必须参数')
         return errorResp(resp, 400, `validate error`)
       }
       let user = await Model.User.findOne({
@@ -415,7 +415,7 @@ async function bindWallet(req, resp) {
       wallet: req.body.wallet,
       wallet_nickName: req.body.wallet_nickName,
       score: user.score + score,
-      bind_wallet_score: bind_wallet_score + score,
+      bind_wallet_score: user.bind_wallet_score + score,
     }
     await Model.User.update(updateData, {
       where: {
