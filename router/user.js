@@ -56,8 +56,7 @@ async function login(req, resp) {
         try {
           // 给上级用户加积分
           if (data.startParam) {
-            let isShareGame = data.startParam.includes('SHAREGAME')
-            const inviteId = parseInt(atob(param))
+            const inviteId = parseInt(atob(data.startParam))
 
             if (!isNaN(inviteId)) {
               data.startParam = inviteId
