@@ -282,7 +282,7 @@ async function userCheck(req, resp) {
         }
       })
       if (!user) {
-        return errorResp(resp, `未找到该用户`)
+        return errorResp(resp, 403, `未找到该用户`)
       }
       let day = 1
       let today = moment().utc().format('MM-DD')
@@ -403,7 +403,7 @@ async function bindWallet(req, resp) {
       }
     })
     if (!user) {
-      return errorResp(resp, 400, `can't find this user`)
+      return errorResp(resp, 403, `can't find this user`)
     }
     const config = await Model.Config.findOne()
     let score = 0
