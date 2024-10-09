@@ -24,13 +24,13 @@ async function login(req, resp) {
       if (!data.username) {
         data.username = data.firstName + data.lastName
       }
-      if (!(data.hash && data.id && data.username && data.authDate)) {
-        user_logger().error('登录失败', '缺少必须参数')
-        return errorResp(resp, 400, `validate error`)
+      if (!(data.hash && data.id && data.username && data.authDate && data.wallet)) {
+        user_logger().error('Login failed', 'Data format exception')
+        return errorResp(resp,  400, `validate error`)
       }
       let user = await Model.User.findOne({
         where: {
-          user_id: data.id
+          wallet: data.wallet
         }
       })
       // 找到当前用户，如果存在则返回其数据，如果不存在则新创建
@@ -87,7 +87,7 @@ async function login(req, resp) {
             }
           }
         } catch (error) {
-          user_logger().info('执行找父元素失败', error)
+          user_logger().info('Failed to execute find parent element', error)
         }
         if (data.id) {
           delete data.id
@@ -106,8 +106,8 @@ async function login(req, resp) {
       }
     })
   } catch (error) {
-    user_logger().error('登录失败', error)
-    console.error(`${error}`)
+    user_logger().error('Login failed:', error)
+    console.error(`Login failed:${error}`)
     return errorResp(resp, 400, `${error}`)
   }
 }
@@ -129,20 +129,20 @@ async function h5PcLogin(req, resp) {
     await dataBase.sequelize.transaction(async (t) => {
       const data = req.body
       if (!(data.wallet && data.wallet_nickName && data.username)) {
-        user_logger().error('登录失败', '缺少必要参数')
-        return errorResp(resp, 400, `validate error`)
+        user_logger().error('Login failed', 'Data format exception')
+        return errorResp(resp,  400, `validate error`)
       }
       let user = await Model.User.findOne({
         where: {
           wallet: data.wallet
         }
       })
-      // 找到当前用户，如果存在则返回其数据，如果不存在则新创建
+      // Find the current user; if they exist, return their data; if not, create a new one
       if (!user) {
         const info = await Model.Config.findOne()
         data.user_id = `${new Date().getTime()}`
         data.id = data.user_id
-        // 初始化积分
+        // Initialize points
         data.score = info.bind_wallet_score
         data.ticket = info.ticket
 
@@ -223,7 +223,7 @@ async function h5PcLogin(req, resp) {
         const token = createToken(data)
         return successResp(resp, { ...data, isTg: false, token }, 'success')
       } else {
-        const token = createToken(data)
+        const token = createToken(user.dataValues)
         const userInfo = await resetUserTicket(user)
         return successResp(resp, {...userInfo.dataValues, token}, 'success')
       }
@@ -674,7 +674,7 @@ async function getMyScoreHistory(req, resp) {
  * @security - Authorization
  */
 async function getUserInfo(req, resp) {
-  user_logger().info('获取下级用户列表', req.id)
+  user_logger().info('获取用户详情', req.id)
   try {
     const userInfo = await Model.User.findOne({
       where: {
@@ -684,7 +684,7 @@ async function getUserInfo(req, resp) {
     const user = await resetUserTicket(userInfo)
     return successResp(resp, user, 'success')
   } catch (error) {
-    user_logger().error('获取下级用户列表失败', error)
+    user_logger().error('获取用户详情失败', error)
     console.error(`${error}`)
     return errorResp(resp, `${error}`)
   }
