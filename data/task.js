@@ -8,7 +8,7 @@ const list = [
     type: 'Game tasks',
   },
   {
-    score: 5000,
+    score: 3000,
     link: '/wallet',
     name: 'Connect to PortKey Wallet',
     ticket: 0,

@@ -95,7 +95,7 @@ const Config = db.sequelize.define(
     invite_friends_ratio: { type: DataTypes.INTEGER, defaultValue: 10 },
     invite_friends_score: { type: DataTypes.INTEGER, defaultValue: 5000 },
     recovery_time: { type: DataTypes.INTEGER, defaultValue: 90 },
-    bind_wallet_score: { type: DataTypes.INTEGER, defaultValue: 3000 },
+    bind_wallet_score: { type: DataTypes.INTEGER, defaultValue: 0 },
     tg_link: { type: DataTypes.STRING, defaultValue: 'https://t.me/goracing_bot/race' },
   },
   {
