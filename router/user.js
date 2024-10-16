@@ -706,6 +706,9 @@ async function getUserInfo(req, resp) {
         user_id: req.id
       },
     })
+    if (!userInfo) {
+      return errorResp(resp, 403, 'not found this user')
+    }
     const user = await resetUserTicket(userInfo)
     return successResp(resp, user, 'success')
   } catch (error) {
