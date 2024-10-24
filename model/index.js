@@ -76,6 +76,7 @@ const TaskList = db.sequelize.define(
     score: { type: DataTypes.INTEGER },
     ticket: { type: DataTypes.INTEGER },
     type: { type: DataTypes.STRING },
+    logo: { type: DataTypes.STRING },
   },
   {
     tableName: 'tasklist'
