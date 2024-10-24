@@ -434,7 +434,10 @@ async function getConfigInfo(req, resp) {
   manager_logger().info('查看系统配置')
   try {
     const info = await Model.Config.findOne()
-    return successResp(resp, info.dataValues, '成功！')
+    const level = await Model.LevelList.findAll({
+      order: [['level', 'asc']]
+    })
+    return successResp(resp, {...info.dataValues, level}, '成功！')
   } catch (error) {
     manager_logger().info('查看系统配置失败', error)
     console.error(`${error}`)

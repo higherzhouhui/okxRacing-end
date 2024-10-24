@@ -76,6 +76,7 @@ async function end(req, resp) {
         if (user.ticket <= 0) {
           return errorResp(resp, 400, 'gas is empty!')
         }
+        
         const { guessType, result, symbol } = req.body
         const config = await Model.Config.findOne()
         let score = config.right_score
@@ -99,7 +100,7 @@ async function end(req, resp) {
           const play_game_list = await Model.Event.findAll({
             attributes: ['count'],
             offset: 0,
-            limit: 20,
+            limit: 50,
             order: [['createdAt', 'desc']],
             where: {
               type: 'play_game',

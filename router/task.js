@@ -59,6 +59,7 @@ async function handle(req, resp) {
           status: 'Claim'
         }
       })
+      let score = user.score
       if (!created) {
         // 钱包要执行检查逻辑
         if (body.type == 'wallet') {
@@ -78,6 +79,7 @@ async function handle(req, resp) {
             }
           }
         )
+        score += body.score 
         await user.increment({
           score: body.score,
           task_score: body.score
@@ -93,7 +95,7 @@ async function handle(req, resp) {
         }
         await Model.Event.create(event_data)
       }
-      return successResp(resp, taskItem, 'success')
+      return successResp(resp, {taskItem, score: score}, 'success')
     })
   } catch (error) {
     task_logger().error(`去完成任务：${error}`)
