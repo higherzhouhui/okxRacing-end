@@ -76,7 +76,22 @@ async function end(req, resp) {
         if (user.ticket <= 0) {
           return errorResp(resp, 400, 'gas is empty!')
         }
-        
+        // 防作弊
+        const lastPlayInfo = await Model.Event.findOne({
+          order: [['createdAt', 'desc']],
+          where: {
+            type: 'play_game'
+          }
+        })
+        if (lastPlayInfo) {
+          const lastTime = new Date(lastPlayInfo.dataValues.createdAt).getTime()
+          const nowTime = Date.now()
+          const diff = nowTime - lastTime
+          if (diff < 8000) {
+            return errorResp(resp, 400, 'Game data exception, please try again!')
+          }
+        }
+
         const { guessType, result, symbol } = req.body
         const config = await Model.Config.findOne()
         let score = config.right_score
@@ -100,7 +115,7 @@ async function end(req, resp) {
           const play_game_list = await Model.Event.findAll({
             attributes: ['count'],
             offset: 0,
-            limit: 50,
+            limit: 100,
             order: [['createdAt', 'desc']],
             where: {
               type: 'play_game',
