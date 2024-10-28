@@ -25,7 +25,7 @@ const list = [
   },
   {
     score: 750,
-    link: 'https://discord.gg/zB2rJEqP',
+    link: 'https://discord.com/invite/EUBq3rHQhr',
     name: 'Join PortKey Discord Community',
     ticket: 0,
     linkType: 'outside',
@@ -49,7 +49,7 @@ const list = [
   },
   {
     score: 750,
-    link: 'https://discord.gg/Uwp9wvn3',
+    link: 'https://discord.com/invite/aelfblockchain',
     name: 'Join aelf Discord Community',
     ticket: 0,
     linkType: 'outside',
