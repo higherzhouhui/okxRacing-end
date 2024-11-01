@@ -501,7 +501,7 @@ async function getUserList(req, resp) {
         rank += index
       }
     })
-    return successResp(resp, { ...list, rank: rank }, 'success')
+    return successResp(resp, { ...list, rank: rank, score: userInfo.score, username: userInfo.username }, 'success')
   } catch (error) {
     user_logger().error('Failed to retrieve user list', error)
     console.error(`${error}`)
