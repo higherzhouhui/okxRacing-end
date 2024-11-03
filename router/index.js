@@ -27,7 +27,7 @@ router.get('/user/subtotallist', user.getSubUserTotalAndList)
 router.get('/user/getcertifieds', user.getCertifieds)
 
 
-router.get('/game/begin', game.begin)
+router.post('/game/begin', game.begin)
 router.get('/game/record', game.record)
 router.get('/game/addgas', game.addgas)
 router.post('/game/end', game.end)

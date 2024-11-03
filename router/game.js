@@ -5,7 +5,7 @@ const dataBase = require('../model/database')
 const { resetUserTicket } = require('../utils/common')
 
 /**
- * get /api/game/begin
+ * post /api/game/begin
  * @summary 开始游戏
  * @tags game
  * @description 开始游戏接口
@@ -15,38 +15,11 @@ async function begin(req, resp) {
   game_logger().info('开始玩游戏')
   try {
     await dataBase.sequelize.transaction(async (t) => {
-      let user = await Model.User.findOne({
-        where: {
-          user_id: req.id
-        }
-      })
-      // 找到当前用户，如果存在则返回其数据，如果不存在则新创建
-      if (user) {
-        let ticket = user.dataValues.ticket
-
-        if (ticket == 0) {
-          return errorResp(resp, 400, `次数不足`)
-        }
-        await user.decrement({
-          ticket: 1
-        })
-
-        const event_data = {
-          type: 'play_game',
-          from_user: req.id,
-          from_username: user.username,
-          to_user: req.id,
-          to_username: user.username,
-          score: 0,
-          ticket: -1,
-          desc: `${user.username} begin play game`
-        }
-        await Model.Event.create(event_data)
-
-        return successResp(resp, { ticket: ticket - 1 }, 'success')
-      } else {
-        return errorResp(resp, 400, '未找到该用户')
-      }
+      const { p, type } = req.body
+      const price = atob(p)
+      dataBase.cache.set(`${req.id}price`, price)
+      dataBase.cache.set(`${req.id}guessType`, type)
+      return successResp(resp, {}, 'success')
     })
   } catch (error) {
     game_logger().error('开始玩游戏失败', error)
@@ -88,11 +61,36 @@ async function end(req, resp) {
           const nowTime = Date.now()
           const diff = nowTime - lastTime
           if (diff < 8000) {
-            return errorResp(resp, 400, 'Game data exception, please try again!')
+            return errorResp(resp, 400, 'Abnormal data, if repeated operations are performed, the account will be banned!')
           }
         }
+        const lastPrice = await dataBase.cache.get(`${req.id}price`)
+        const _guessType = await dataBase.cache.get(`${req.id}guessType`)
+        dataBase.cache.set(`${req.id}price`, null)
+        dataBase.cache.set(`${req.id}guessType`, null)
+        if (!lastPrice || !_guessType) {
+          return errorResp(resp, 400, 'Abnormal data, if repeated operations are performed, the account will be banned')
+        }
+        const { gt, rs, symbol, p } = req.body
+        const currentPrice = atob(p)
+        const guessType = atob(gt)
+        const result = atob(rs)
+        const guess = currentPrice - lastPrice > 0 ? 'Rise' : 'Fall'
+        
 
-        const { guessType, result, symbol } = req.body
+        let _result = 'Miss'
+        if (_guessType == guess) {
+          _result = 'Win'
+        }
+        if (currentPrice - lastPrice == 0) {
+          _result = 'Miss'
+        }
+        
+        if (result != _result) {
+          return errorResp(resp, 400, 'Abnormal data, if repeated operations are performed, the account will be banned')
+        }
+        //以上全是数据真实性验证逻辑
+
         const config = await Model.Config.findOne()
         let score = config.right_score
         let parentUser_score = score * config.invite_friends_ratio / 100
