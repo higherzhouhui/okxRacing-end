@@ -4,6 +4,7 @@ const Model = require('../model/index')
 const dataBase = require('../model/database')
 const moment = require('moment/moment')
 const { isLastDay, resetUserTicket, createToken } = require('../utils/common')
+const { where } = require('sequelize')
 
 /**
  * post /api/user/login
@@ -26,7 +27,7 @@ async function login(req, resp) {
       }
       if (!(data.hash && data.id && data.username && data.authDate && data.wallet)) {
         user_logger().error('Login failed', 'Data format exception')
-        return errorResp(resp,  400, `validate error`)
+        return errorResp(resp, 400, `validate error`)
       }
       let user = await Model.User.findOne({
         where: {
@@ -102,7 +103,7 @@ async function login(req, resp) {
         await user.update(updateData)
         await resetUserTicket(user)
         const token = createToken(user)
-        return successResp(resp, {token, ...user.dataValues}, 'success')
+        return successResp(resp, { token, ...user.dataValues }, 'success')
       }
     })
   } catch (error) {
@@ -130,7 +131,7 @@ async function h5PcLogin(req, resp) {
       const data = req.body
       if (!(data.wallet && data.wallet_nickName && data.username)) {
         user_logger().error('Login failed', 'Data format exception')
-        return errorResp(resp,  400, `validate error`)
+        return errorResp(resp, 400, `validate error`)
       }
       let user = await Model.User.findOne({
         where: {
@@ -225,7 +226,7 @@ async function h5PcLogin(req, resp) {
       } else {
         const token = createToken(user.dataValues)
         const userInfo = await resetUserTicket(user)
-        return successResp(resp, {...userInfo.dataValues, token}, 'success')
+        return successResp(resp, { ...userInfo.dataValues, token }, 'success')
       }
     })
   } catch (error) {
@@ -435,7 +436,7 @@ async function bindWallet(req, resp) {
       }
       await Model.Event.create(event_data)
     }
-   
+
     await tx.commit()
     return successResp(resp, updateData, 'success')
   } catch (error) {
@@ -1008,13 +1009,29 @@ async function getCertifieds(req, resp) {
           },
         }
       })
-      return successResp(resp, {count}, 'success')
+      return successResp(resp, { count }, 'success')
     })
-  } catch(error) {
+  } catch (error) {
     user_logger().error('获取已经认证的人数失败', error)
     return errorResp(resp, 400, `${error}`)
   }
 }
+
+// 每天的上午08:00执行任务，指定时区为Asia/Chongqing
+cron.schedule('0 8 * * *', async () => {
+  await Model.User.update({
+    free_gas: 3,
+  },
+    {
+      where: {
+
+      }
+    }
+  )
+}, {
+  scheduled: true,
+  timezone: 'Asia/Chongqing'
+});
 
 
 //----------------------------- private method --------------
