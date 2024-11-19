@@ -4,8 +4,7 @@ const Model = require('../model/index')
 const dataBase = require('../model/database')
 const moment = require('moment/moment')
 const { isLastDay, resetUserTicket, createToken } = require('../utils/common')
-const { where } = require('sequelize')
-
+const cron = require('node-cron');
 /**
  * post /api/user/login
  * @summary 登录
