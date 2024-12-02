@@ -10,7 +10,7 @@ const list = [
   {
     score: 750,
     link: 'https://x.com/PortKey_DID',
-    name: 'Follow PortKey on X',
+    name: 'Follow portKey on X',
     ticket: 0,
     linkType: 'outside',
     type: 'Driver',
@@ -18,7 +18,7 @@ const list = [
   {
     score: 750,
     link: 'https://t.me/PortKey_Official_Group',
-    name: 'Join PortKey Telegram Community',
+    name: 'Join portKey Telegram Community',
     ticket: 0,
     linkType: 'telegram',
     type: 'Driver',
@@ -26,7 +26,7 @@ const list = [
   {
     score: 750,
     link: 'https://discord.com/invite/EUBq3rHQhr',
-    name: 'Join PortKey Discord Community',
+    name: 'Join portKey Discord Community',
     ticket: 0,
     linkType: 'outside',
     type: 'Driver',
