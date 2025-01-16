@@ -1,8 +1,12 @@
 const Model = require('../model/index')
 const dataBase = require('../model/database')
 const jwt = require('jsonwebtoken')
-const SECRET_KEY = 'CAT_API'
+const SECRET_KEY = 'OKX_RACE'
+const crypto = require('crypto');
 
+function md5(data) {
+  return crypto.createHash('md5').update(data).digest('hex');
+}
 function createToken(data) {
   const token = jwt.sign(
     { user: {username: data.username, id: data.user_id} },
@@ -196,6 +200,46 @@ async function resetUserTicket(user) {
   return user
 }
 
+// 参数序列化
+const dataSerialize = (sortObj) => {
+  let strJoin = ''
+  for (let key in sortObj) {
+    if (sortObj[key] || sortObj[key] == 0) {
+      strJoin += key + "=" + sortObj[key] + "&"
+    }
+  }
+  return strJoin
+}
+
+// 参数排序
+function dataSort(obj) {
+  if (JSON.stringify(obj) == "{}" || obj == null) {
+    return {}
+  }
+  let key = Object.keys(obj)?.sort()
+  let newObj = {}
+  for (let i = 0; i < key.length; i++) {
+    newObj[key[i]] = obj[key[i]]
+  }
+  return newObj
+}
+
+
+const getSignature = (obj) => {
+  const content = dataSerialize(dataSort({
+    ...obj,
+    sign: '',
+  }))
+  if (Date.now() - obj.timeStamp > 3000) {
+    return 'expired'
+  }
+  const secretKey = 'YpEzusH5qFVd3hPe8cwYhyLZdh88Bpe'
+  const signature = md5(content + "secretKey=" + secretKey);
+
+  return signature.toLocaleUpperCase()
+}
+
+
 /******************************Private method */
 
 module.exports = {
@@ -210,4 +254,5 @@ module.exports = {
   isLastDay,
   resetUserTicket,
   createToken,
+  getSignature
 }

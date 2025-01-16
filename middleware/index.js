@@ -52,7 +52,7 @@ async function token_auth(req, resp, next) {
     return tokenInvalidateErrorResp(resp)
   }
   token = token.substring(7)
-  jwt.verify(token, 'CAT_API', (error, jwtData) => {
+  jwt.verify(token, 'OKX_RACE', (error, jwtData) => {
     if (error) {
       return tokenInvalidateErrorResp(resp, 'token is expired')
     }

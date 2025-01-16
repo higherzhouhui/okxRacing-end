@@ -23,14 +23,14 @@ const list = [
     linkType: 'telegram',
     type: 'Driver',
   },
-  {
-    score: 750,
-    link: 'https://discord.com/invite/EUBq3rHQhr',
-    name: 'Join Portkey Discord Community',
-    ticket: 0,
-    linkType: 'outside',
-    type: 'Driver',
-  },
+  // {
+  //   score: 750,
+  //   link: 'https://discord.com/invite/EUBq3rHQhr',
+  //   name: 'Join Portkey Discord Community',
+  //   ticket: 0,
+  //   linkType: 'outside',
+  //   type: 'Driver',
+  // },
   {
     score: 750,
     link: 'https://x.com/aelfblockchain',

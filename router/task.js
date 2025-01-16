@@ -40,6 +40,10 @@ async function handle(req, resp) {
       const id = req.id
       task_logger().info(`用户:${id}去完成任务,${JSON.stringify(req.body)}`)
       const body = req.body
+      const sign = getSignature(body)
+      if (sign !== body.sign) {
+        return errorResp(resp, 400, 'signature error')
+      }
       const user = await Model.User.findOne({
         where: {
           user_id: req.id

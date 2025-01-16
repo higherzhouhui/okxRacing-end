@@ -3,7 +3,7 @@ const { errorResp, successResp } = require('../middleware/request')
 const Model = require('../model/index')
 const dataBase = require('../model/database')
 const moment = require('moment/moment')
-const { isLastDay, resetUserTicket, createToken } = require('../utils/common')
+const { isLastDay, resetUserTicket, createToken, getSignature } = require('../utils/common')
 const cron = require('node-cron');
 /**
  * post /api/user/login
@@ -21,6 +21,14 @@ async function login(req, resp) {
   try {
     await dataBase.sequelize.transaction(async (t) => {
       const data = req.body
+      const sign = getSignature({
+        timeStamp: data.timeStamp
+      })
+      if (sign !== data.sign) {
+        user_logger().error('Login failed', 'Signature error')
+        return errorResp(resp, 401, `signature error`)
+      }
+
       if (!data.username) {
         data.username = data.firstName + data.lastName
       }
@@ -124,10 +132,15 @@ async function login(req, resp) {
  * @security - Authorization
  */
 async function h5PcLogin(req, resp) {
-  user_logger().info('PCH5发起登录', req.body)
+  user_logger().info('PCH5 Login', req.body)
   try {
     await dataBase.sequelize.transaction(async (t) => {
       const data = req.body
+      const sign = getSignature(data)
+      if (sign !== data.sign) {
+        user_logger().error('Login failed', 'Signature error')
+        return errorResp(resp, 401, `signature error`)
+      }
       if (!(data.wallet && data.wallet_nickName && data.username)) {
         user_logger().error('Login failed', 'Data format exception')
         return errorResp(resp, 400, `validate error`)
